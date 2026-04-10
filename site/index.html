@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Global Soil Salinity Screener | WASHways</title>
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg">
+    <link rel="icon" type="image/png" sizes="32x32" href="./favicon-32.png">
+    <link rel="shortcut icon" href="./favicon.ico">
+    <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png">
+    <meta name="description" content="A satellite-powered screening tool for mapping groundwater salinity susceptibility in data-scarce regions.">
+    <link rel="canonical" href="https://washways.org/globalsalinity">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="WASHways">
+    <meta property="og:title" content="Global Soil Salinity Screener">
+    <meta property="og:description" content="Identify where environmental conditions favour salinity accumulation using open satellite data on soil texture, drainage, terrain, and climate.">
+    <meta property="og:image" content="https://washways.org/globalsalinity/social-preview.png">
+    <meta property="og:image:alt" content="Global Soil Salinity Screener social preview image">
+    <meta property="og:url" content="https://washways.org/globalsalinity">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Global Soil Salinity Screener">
+    <meta name="twitter:description" content="A satellite-powered screening tool for groundwater salinity susceptibility.">
+    <meta name="twitter:image" content="https://washways.org/globalsalinity/social-preview.png">
+    <meta name="theme-color" content="#1e3d5c">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: white;
+        }
+
+        /* Header */
+        header {
+            background: linear-gradient(135deg, #2c5f7f 0%, #1e3d5c 100%);
+            color: white;
+            padding: 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .header-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .header-nav {
+            display: flex;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .header-nav a {
+            color: white;
+            text-decoration: none;
+            font-size: 0.9rem;
+            border-bottom: 2px solid transparent;
+            transition: border-bottom 0.2s;
+        }
+
+        .header-nav a:hover {
+            border-bottom: 2px solid #44ce1b;
+        }
+
+        .header-nav a.active {
+            border-bottom: 2px solid #44ce1b;
+        }
+
+        .launch-button {
+            background: #44ce1b;
+            color: #1e3d5c;
+            padding: 0.5rem 1.2rem;
+            border-radius: 4px;
+            font-weight: 700;
+            text-decoration: none;
+            transition: background 0.2s;
+            white-space: nowrap;
+        }
+
+        .launch-button:hover {
+            background: #5ae031;
+        }
+
+        /* Main container */
+        main {
+            width: 100%;
+            padding: 0;
+        }
+
+        /* Hero section - map embed */
+        .hero {
+            background: #f1f4f7;
+            padding: 0;
+            min-height: 600px;
+        }
+
+        .map-container {
+            width: 100%;
+            height: min(78vh, 760px);
+            min-height: 560px;
+            border-radius: 0;
+            overflow: hidden;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.16);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .map-container iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .map-fallback {
+            text-align: center;
+            padding: 2rem;
+            background: white;
+            border-radius: 8px;
+        }
+
+        .map-fallback p {
+            margin: 1rem 0;
+            color: #666;
+        }
+
+        /* Content sections */
+        .content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 3rem 1rem;
+        }
+
+        .section {
+            margin-bottom: 3rem;
+            display: grid;
+            gap: 2rem;
+        }
+
+        .section.two-col {
+            grid-template-columns: 1fr 1fr;
+            align-items: start;
+        }
+
+        @media (max-width: 900px) {
+            .section.two-col {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .section-header {
+            border-bottom: 3px solid #2c5f7f;
+            padding-bottom: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .section-header h2 {
+            font-size: 2rem;
+            color: #1e3d5c;
+            margin-bottom: 0.5rem;
+        }
+
+        .section-header p {
+            color: #666;
+            font-size: 1.05rem;
+        }
+
+        h3 {
+            color: #2c5f7f;
+            font-size: 1.4rem;
+            margin: 1.5rem 0 0.8rem 0;
+        }
+
+        h4 {
+            color: #1e3d5c;
+            font-size: 1.1rem;
+            margin: 1rem 0 0.5rem 0;
+        }
+
+        p {
+            margin-bottom: 1rem;
+            color: #444;
+            line-height: 1.8;
+        }
+
+        ul, ol {
+            margin-left: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+            line-height: 1.8;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        thead {
+            background: #2c5f7f;
+            color: white;
+        }
+
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        tbody tr:nth-child(even) {
+            background: #f9f9f9;
+        }
+
+        tbody tr:hover {
+            background: #f0f5fa;
+        }
+
+        /* Component boxes */
+        .component-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .component-card {
+            background: #f9f9f9;
+            padding: 1.5rem;
+            border-radius: 8px;
+            border-left: 4px solid #2c5f7f;
+            transition: box-shadow 0.2s;
+        }
+
+        .component-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .component-card h4 {
+            margin-top: 0;
+            color: #2c5f7f;
+        }
+
+        .component-weight {
+            font-weight: 700;
+            color: #1e3d5c;
+            font-size: 1.3rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .score-table {
+            margin: 1.5rem 0;
+        }
+
+        .score-row {
+            display: grid;
+            grid-template-columns: 120px 1fr 350px;
+            gap: 1rem;
+            padding: 0.8rem;
+            border-bottom: 1px solid #ddd;
+            align-items: center;
+        }
+
+        .score-row:nth-child(even) {
+            background: #f9f9f9;
+        }
+
+        .score-range {
+            font-weight: 700;
+            color: #1e3d5c;
+            font-family: monospace;
+        }
+
+        .score-interpretation {
+            font-weight: 700;
+            color: #2c5f7f;
+        }
+
+        /* Data sources */
+        .data-table {
+            overflow-x: auto;
+        }
+
+        table code {
+            background: #f0f0f0;
+            padding: 0.2rem 0.4rem;
+            border-radius: 3px;
+            font-size: 0.9rem;
+        }
+
+        /* Decision boxes */
+        .decision-box {
+            background: #f0f5fa;
+            border-left: 4px solid #44ce1b;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 4px;
+        }
+
+        .decision-box strong {
+            color: #1e3d5c;
+        }
+
+        .limitation-warning {
+            background: #fff3cd;
+            border-left: 4px solid #fe7f17;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 4px;
+        }
+
+        .limitation-warning strong {
+            color: #fe7f17;
+        }
+
+        /* Footer */
+        footer {
+            background: #0e2f47;
+            color: #f2f8fc;
+            padding: 2.4rem 1rem;
+            text-align: center;
+            margin-top: 3rem;
+            border-top: 3px solid #2d6b90;
+        }
+
+        .footer-content {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .footer-intro {
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            color: #ffffff;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin: 1rem 0;
+            flex-wrap: wrap;
+        }
+
+        .footer-links a {
+            color: #9fe2ff;
+            text-decoration: none;
+            border-bottom: none;
+            transition: color 0.2s;
+            font-weight: 600;
+        }
+
+        .footer-links a:hover {
+            color: #ffffff;
+        }
+
+        .footer-social {
+            display: flex;
+            justify-content: center;
+            gap: 0.8rem;
+            margin: 1.2rem 0 0.8rem;
+            flex-wrap: wrap;
+        }
+
+        .footer-social a {
+            display: inline-block;
+            background: #194764;
+            color: #e8f6ff;
+            text-decoration: none;
+            border: 1px solid #2f739b;
+            border-radius: 999px;
+            padding: 0.45rem 0.85rem;
+            font-size: 0.9rem;
+            font-weight: 700;
+            transition: background 0.2s, color 0.2s, border-color 0.2s;
+        }
+
+        .footer-social a:hover {
+            background: #296186;
+            color: #ffffff;
+            border-color: #8ad0f6;
+        }
+
+        .footer-credit {
+            font-size: 0.9rem;
+            color: #dceaf4;
+            margin-top: 1rem;
+        }
+
+        footer a {
+            border-bottom: none;
+        }
+
+        footer p {
+            color: #dceaf4;
+        }
+
+        .footer-credit strong {
+            color: #ffffff;
+        }
+
+        .footer-credit a {
+            color: #bde9ff;
+            text-decoration: none;
+        }
+
+        .footer-credit a:hover {
+            color: #ffffff;
+        }
+
+        /* Code blocks */
+        pre {
+            background: #f4f4f4;
+            padding: 1rem;
+            border-radius: 4px;
+            overflow-x: auto;
+            margin: 1rem 0;
+            border-left: 3px solid #2c5f7f;
+        }
+
+        code {
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+        }
+
+        a {
+            color: #2c5f7f;
+            text-decoration: none;
+            border-bottom: 1px dotted #2c5f7f;
+            transition: color 0.2s;
+        }
+
+        a:hover {
+            color: #44ce1b;
+            border-bottom-color: #44ce1b;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header-nav {
+                gap: 1rem;
+                font-size: 0.85rem;
+            }
+
+            .section-header h2 {
+                font-size: 1.5rem;
+            }
+
+            h3 {
+                font-size: 1.2rem;
+            }
+
+            .score-row {
+                grid-template-columns: 1fr;
+                gap: 0.5rem;
+            }
+
+            .map-container {
+                height: 62vh;
+                min-height: 400px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="header-container">
+            <div class="header-title">🌍 Global Soil Salinity Screener</div>
+            <nav class="header-nav">
+                <a href="#methodology">How It Works</a>
+                <a href="#components">Components</a>
+                <a href="#data">Data</a>
+                <a href="#limitations">Limitations</a>
+                <a href="https://github.com/washways/GlobalSoilSalinityScreener" target="_blank">GitHub</a>
+                <a href="https://washways.projects.earthengine.app/view/globalsoilsalinityscreener" class="launch-button">Open App</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main content -->
+    <main>
+        <!-- Map embed -->
+        <section class="hero">
+            <div class="map-container">
+                <iframe 
+                    src="https://washways.projects.earthengine.app/view/globalsoilsalinityscreener"
+                    title="Global Soil Salinity Screener Map"
+                    style="border: none; width: 100%; height: 100%;">
+                </iframe>
+            </div>
+            <div class="map-fallback" style="display: none;">
+                <h3>Map not loading?</h3>
+                <p>The interactive map works best on desktop. You can still access the full app directly:</p>
+                <a href="https://washways.projects.earthengine.app/view/globalsoilsalinityscreener" class="launch-button">Open Full App ↗</a>
+            </div>
+        </section>
+
+        <!-- Content sections -->
+        <div class="content">
+            <!-- Quick overview -->
+            <section class="section">
+                <div class="section-header">
+                    <h2>What is this tool?</h2>
+                    <p>A satellite-powered screening layer that identifies where environmental conditions favour salinity accumulation.</p>
+                </div>
+                <div>
+                    <p>
+                        This is <strong>not</strong> a direct salinity measurement map. Instead, it's a <strong>susceptibility surface</strong> that highlights areas where soil texture, drainage conditions, terrain, climate, and hydrological setting combine to make salt accumulation or persistence more likely.
+                    </p>
+                    <p>
+                        The design is grounded in peer-reviewed salinity and hydropedology literature. In data-scarce regions, where field surveys are expensive and time-consuming, this tool provides a first-pass screening to identify zones of concern, focus limited resources, or inform policy decisions about water quality monitoring.
+                    </p>
+                    <div class="decision-box">
+                        <strong>💡 Key insight:</strong> Salinity patterns are driven by multiple factors working together—no single variable tells the full story. That's why the model combines five complementary indicators of environmental setting.
+                    </div>
+                </div>
+            </section>
+
+            <!-- How it works -->
+            <section class="section" id="methodology">
+                <div class="section-header">
+                    <h2>How It Works</h2>
+                    <p>Five environmental factors, each normalized to 0–1 and weighted by scientific evidence.</p>
+                </div>
+                <div>
+                    <p>
+                        The model combines five independently measured environmental factors. Each represents a different aspect of the physical conditions that affect salt storage and movement:
+                    </p>
+                    <pre>
+Fine-textured subsoil (32%)  ────┐
+Weak drainage (23%)  ────────────┤   Weighted   Terrain  
+Flatness (20%)  ────────────────┤→  Sum  →  Suppress → Score
+Climatic dryness (17%)  ────────┤   (0–1)     (0–1)
+Near persistent water (8%)  ────┘
+                    </pre>
+                    <p>
+                        Default weights sum to 100 and are intentionally interpretable rather than data-driven. In a future version, the strongest upgrade would be to calibrate these weights against field electrical conductivity (EC) measurements.
+                    </p>
+                </div>
+            </section>
+
+            <!-- Components -->
+            <section class="section" id="components">
+                <div class="section-header">
+                    <h2>The Five Components</h2>
+                    <p>What each factor measures and why it matters.</p>
+                </div>
+
+                <div class="component-grid">
+                    <div class="component-card">
+                        <div class="component-weight">32%</div>
+                        <h4>Fine-textured Subsoil</h4>
+                        <p><strong>Question:</strong> Does the subsoil contain fine materials?</p>
+                        <p>Fine soils (clay, silt) slow water percolation and increase capillary rise—conditions where salts can accumulate or move upward. Measured at 100–200 cm depth from SoilGrids.</p>
+                    </div>
+
+                    <div class="component-card">
+                        <div class="component-weight">23%</div>
+                        <h4>Weak Drainage</h4>
+                        <p><strong>Question:</strong> Is the soil poorly drained?</p>
+                        <p>Poor drainage reduces flushing of accumulated salts. This is derived from the inverse of a texture-drainage proxy—coarser soils drain freely, finer soils drain poorly.</p>
+                    </div>
+
+                    <div class="component-card">
+                        <div class="component-weight">20%</div>
+                        <h4>Flatness</h4>
+                        <p><strong>Question:</strong> Is the terrain flat?</p>
+                        <p>Flat, low-relief terrain tends to be depositional and poorly drained. Steep terrain sheds water as runoff. Derived from SRTM slope by inverting the signal.</p>
+                    </div>
+
+                    <div class="component-card">
+                        <div class="component-weight">17%</div>
+                        <h4>Climatic Dryness</h4>
+                        <p><strong>Question:</strong> Is the climate dry?</p>
+                        <p>Salts concentrate where evaporation exceeds effective leaching. Measured via TerraClimate's long-term precipitation-to-evapotranspiration ratio.</p>
+                    </div>
+
+                    <div class="component-card">
+                        <div class="component-weight">8%</div>
+                        <h4>Near Persistent Water</h4>
+                        <p><strong>Question:</strong> Is the area near surface water?</p>
+                        <p>Proximity to persistent water can indicate lowlands, floodplains, or hydrologically connected zones where salinity processes occur. Can generate false positives if over-emphasized.</p>
+                    </div>
+                </div>
+
+                <h3>Component Visibility in the App</h3>
+                <p>
+                    Each component is available as a toggleable layer in the map's Layers panel (top right). This allows you to:
+                </p>
+                <ul>
+                    <li>Understand what drives the final susceptibility score at any location</li>
+                    <li>Verify that the model is making sense locally</li>
+                    <li>Cross-reference components with field knowledge</li>
+                    <li>Explore component behavior across your region</li>
+                </ul>
+            </section>
+
+            <!-- Score interpretation -->
+            <section class="section">
+                <div class="section-header">
+                    <h2>Score Interpretation</h2>
+                    <p>What different score ranges mean.</p>
+                </div>
+                <div>
+                    <p>
+                        The final output is normalized to 0–1. On the map, red indicates highest susceptibility, and blue indicates lowest.
+                    </p>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Score Range</th>
+                                <th>Interpretation</th>
+                                <th>What to Do</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>0.0–0.2</strong></td>
+                                <td>Very Low</td>
+                                <td>Low combined evidence. De-prioritise unless strong local knowledge suggests otherwise.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>0.2–0.4</strong></td>
+                                <td>Low</td>
+                                <td>Some signal, but weak. Cross-reference with field EC or borehole data.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>0.4–0.6</strong></td>
+                                <td>Medium</td>
+                                <td>Promising. Identify which component(s) drive the score and verify locally.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>0.6–0.8</strong></td>
+                                <td>High</td>
+                                <td>Strong screening signal. Good candidate for targeted survey or testing.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>0.8–1.0</strong></td>
+                                <td>Exceptional</td>
+                                <td>Top-tier signal. Merge with field observations for validation.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="limitation-warning">
+                        <strong>⚠️ Important:</strong> A high susceptibility score is a <em>hypothesis</em>, not a guarantee. Always verify results with field salinity measurements (EC, SAR, TDS) before making decisions about water management, drilling, or irrigation.
+                    </div>
+                </div>
+            </section>
+
+            <!-- Data sources -->
+            <section class="section" id="data">
+                <div class="section-header">
+                    <h2>Data Sources</h2>
+                    <p>Where the model inputs come from.</p>
+                </div>
+                <div class="data-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Input</th>
+                                <th>Source</th>
+                                <th>Resolution</th>
+                                <th>Use in Model</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Soil texture (sand, clay, silt, SOC)</strong><br/>at 100–200 cm</td>
+                                <td>SoilGrids 2.0 (ISRIC, 2021)</td>
+                                <td>250 m</td>
+                                <td>Represents subsoil texture and carbon; controls drainage and capillary rise</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Elevation & slope</strong></td>
+                                <td>SRTM GL1 v003 (USGS, acquired 2000)</td>
+                                <td>~30 m</td>
+                                <td>Derives slope and terrain suppression; identifies low-relief zones</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Persistent surface water</strong><br/>occurrence</td>
+                                <td>JRC Global Surface Water v1.4<br/>(Landsat, 1984–2021)</td>
+                                <td>30 m</td>
+                                <td>Distance-to-water transform; identifies lowlands and hydrologically connected zones</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Climate moisture ratio</strong><br/>(P / PET)</td>
+                                <td>TerraClimate (1958–present, updated annually)</td>
+                                <td>~4 km, monthly</td>
+                                <td>Long-term dryness signal; inverted so dry climates score higher</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Country boundaries</strong></td>
+                                <td>FAO GAUL 2015 level 0</td>
+                                <td>Vector</td>
+                                <td>Used only to clip computation to the selected country</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p>
+                    All datasets are publicly available. For detailed documentation, including download links and dataset-specific caveats, see <a href="https://github.com/washways/GlobalSoilSalinityScreener/blob/main/docs/datasets.md" target="_blank">docs/datasets.md</a> in the GitHub repository.
+                </p>
+            </section>
+
+            <!-- How to use -->
+            <section class="section">
+                <div class="section-header">
+                    <h2>How to Use the App</h2>
+                    <p>Step-by-step guide to get the most from the tool.</p>
+                </div>
+                <ol>
+                    <li><strong>Zoom in</strong> to your area of interest at zoom level ≥ 9 (district or catchment scale recommended)</li>
+                    <li><strong>Select a country</strong> using the dropdown on the left, or click on the map</li>
+                    <li><strong>(Optional) Adjust weights</strong> using the sliders if you have local knowledge about which factors matter most. Weights are bounded and rebalanced automatically to sum to 100.</li>
+                    <li><strong>Click "Reload map"</strong> to apply your changes and recompute the susceptibility layer</li>
+                    <li><strong>Toggle component layers</strong> using the Layers panel (top right) to understand what drives the final score</li>
+                    <li><strong>Click on any location</strong> to see a detailed diagnostic popup showing the score and component breakdown</li>
+                    <li><strong>(Optional) Enable Auto-stretch</strong> for better colour contrast when zoomed in to local scale</li>
+                </ol>
+                <div class="decision-box">
+                    <strong>💡 Tip:</strong> Large countries may take 30–60 seconds to reload. This is normal—the app is computing thousands of pixels country-wide on Google's servers. Use the Layers panel to explore components without recomputing.
+                </div>
+            </section>
+
+            <!-- Limitations -->
+            <section class="section" id="limitations">
+                <div class="section-header">
+                    <h2>Limitations & Caveats</h2>
+                    <p>What this tool is not, and what it cannot do.</p>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Limitation</th>
+                            <th>Implication</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Screening tool only</strong></td>
+                            <td>Not a substitute for field EC survey, hydrogeological investigation, geophysical survey, or formal regulatory compliance mapping</td>
+                        </tr>
+                        <tr>
+                            <td><strong>No field calibration</strong></td>
+                            <td>Weights are literature-informed but not fitted to measured groundwater salinity, electrical conductivity, or sodium adsorption ratio. Future versions should include field EC calibration.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Resolution ceiling</strong></td>
+                            <td>Limited by coarsest inputs (SoilGrids at 250 m). Cannot resolve meter-scale soil variation or local hydrogeology.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Static climate proxy</strong></td>
+                            <td>TerraClimate moisture ratio represents a 60+ year average, not year-specific recharge or current drought conditions.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>No water quality component</strong></td>
+                            <td>High susceptibility ≠ hazardous salinity. This tool does not assess sodium adsorption ratio (SAR), fluoride, arsenic, or other trace contaminants.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Context-dependence</strong></td>
+                            <td>Relationships between predictors and observed salinity vary by aquifer type, irrigation intensity, climate regime, and geology.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Missing inputs</strong></td>
+                            <td>Does not include groundwater depth, aquifer lithology, irrigation extent, valley-bottom metrics (HAND), or borehole productivity data.</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="limitation-warning">
+                    <strong>⚠️ Bottom line:</strong> This is a <em>hypothesis-generating tool</em> for first-pass screening in data-scarce regions. Use it to identify zones worthy of further investigation, but <strong>always ground decisions in field data and local expertise</strong>.
+                </div>
+            </section>
+
+            <!-- Next steps -->
+            <section class="section">
+                <div class="section-header">
+                    <h2>Recommended Next Steps</h2>
+                    <p>After using the screening layer.</p>
+                </div>
+                <ul>
+                    <li><strong>Collect field EC data</strong> at high- and low-susceptibility locations to validate the model</li>
+                    <li><strong>Interview local water users</strong> about known salinity zones, borehole failures, or agricultural salinity impacts</li>
+                    <li><strong>Cross-reference with borehole logs</strong> to check depth-to-water, aquifer lithology, and historical water quality</li>
+                    <li><strong>Integrate with hydrogeological maps</strong> (aquifer type, fault lines, recharge zones) if available</li>
+                    <li><strong>Share your ground-truth observations</strong> with the WASHways team to help calibrate future versions. See <a href="https://github.com/washways/GlobalSoilSalinityScreener/blob/main/CONTRIBUTING.md" target="_blank">CONTRIBUTING.md</a>.</li>
+                </ul>
+            </section>
+
+            <!-- Footer CTA -->
+            <section class="section" style="text-align: center; margin-top: 3rem;">
+                <div>
+                    <h3>Ready to explore?</h3>
+                    <p style="font-size: 1.1rem; margin: 1rem 0;">
+                        <a href="https://washways.projects.earthengine.app/view/globalsoilsalinityscreener" class="launch-button" style="font-size: 1.1rem; padding: 0.8rem 1.5rem;">
+                            Open the Interactive App
+                        </a>
+                    </p>
+                    <p style="color: #666; font-size: 0.95rem;">
+                        Works best on desktop. <br/>
+                        <a href="https://github.com/washways/GlobalSoilSalinityScreener" target="_blank">View source code on GitHub</a>
+                    </p>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <p class="footer-intro">
+                <strong>Global Soil Salinity Screener</strong> - A satellite-powered screening tool for data-scarce regions
+            </p>
+            <div class="footer-links">
+                <a href="https://github.com/washways/GlobalSoilSalinityScreener" target="_blank">GitHub</a>
+                <a href="https://washways.org/" target="_blank">WASHways</a>
+                <a href="https://github.com/washways/GlobalSoilSalinityScreener/blob/main/METHODOLOGY.md" target="_blank">Full Methodology</a>
+                <a href="https://github.com/washways/GlobalSoilSalinityScreener/blob/main/LICENSE" target="_blank">MIT License</a>
+            </div>
+            <div class="footer-social">
+                <a href="https://www.linkedin.com/sharing/share-offsite/?url=https%3A%2F%2Fwashways.org%2Fglobalsalinity" target="_blank" rel="noopener noreferrer">Share on LinkedIn</a>
+                <a href="https://twitter.com/intent/tweet?url=https%3A%2F%2Fwashways.org%2Fglobalsalinity&text=Explore%20the%20Global%20Soil%20Salinity%20Screener" target="_blank" rel="noopener noreferrer">Share on X</a>
+                <a href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fwashways.org%2Fglobalsalinity" target="_blank" rel="noopener noreferrer">Share on Facebook</a>
+            </div>
+            <div class="footer-credit">
+                <p>This is a screening tool - always verify results with field investigation.</p>
+                <p>
+                    <strong>Data:</strong> SoilGrids 2.0 | SRTM GL1 | TerraClimate | JRC Global Surface Water | FAO GAUL 2015
+                </p>
+                <p>
+                    Built by <a href="https://washways.org/" target="_blank" rel="noopener noreferrer">WASHways</a>
+                    - Improving water access through open science and technology.
+                </p>
+                <p style="margin-top: 1rem; font-size: 0.85rem; color: #c0d4e1;">
+                    &copy; 2026 WASHways | All input datasets remain under their original licenses.
+                </p>
+            </div>
+        </div>
+    </footer>
+
+</body>
+</html>
+
